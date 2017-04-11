@@ -1,8 +1,10 @@
-function! job_object#create(opts) abort
+function! job_object#create(buffer_id, job_id, opts) abort
   let obj = {}
 
   let obj.opts = a:opts
   let obj.__history = []
+  let obj.buffer_id = a:buffer_id
+  let obj.job_id = a:job_id
   let obj.add_command = function('job_object#add_command')
   let obj.start_suggestions = function('job_object#start_suggestions')
 
@@ -40,4 +42,21 @@ function! job_object#add_command(command) dict abort
   elseif type(a:command) == v:t_string
     call add(self.__history, a:command)
   endif
+endfunction
+
+function! job_object#set_buffer_job(object)
+  let b:job_object_id = a:object.job_id
+endfunction
+
+function! job_object#get_buffer_job(...)
+  " TODO: Get buffer job for a different buffer
+  if !has_key(b:, 'job_object_id')
+    return v:false
+  endif
+
+  if !has_key(g:vat_buffers, b:job_object_id)
+    return v:false
+  endif
+
+  return g:vat_buffers[b:job_object_id]
 endfunction
