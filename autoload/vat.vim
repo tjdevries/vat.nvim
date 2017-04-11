@@ -58,6 +58,9 @@ function! vat#new_command_line(current_job)
         \ nvim_buf_get_number(0), a:current_job.job_id)
         \ )
 
+  execute('inoremap <buffer> <C-N>'
+        \ . ' <C-R>=job_object#buffer_complete()<CR>')
+
   startinsert
 endfunction
 
