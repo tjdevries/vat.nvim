@@ -61,11 +61,13 @@ function! job_object#get_buffer_job(...)
   return g:vat_buffers[b:job_object_id]
 endfunction
 
+" TODO: Integrate with deoplete?
 function! job_object#buffer_complete() abort
   " TODO: Add different complete options
   let line = getline(".")
+  let len_line = len(line)
   let suggestions = job_object#get_buffer_job().start_suggestions(line)
-  call map(suggestions, 'v:val[len(line):]')
+  call map(suggestions, 'v:val[' . len_line . ':]')
   call complete(col('.'), suggestions)
   return ''
 endfunction
