@@ -1,0 +1,9 @@
+Execute(Test Job Object):
+  let my_job = job_object#create({})
+  let my_job.add_command([
+    \ 'hello world',
+    \ 'not going to go',
+    \ 'hello another',
+    \ ])
+
+  AssertEqual ['hello world', 'hello another'], my_job.start_suggestions('hello')
