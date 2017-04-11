@@ -60,6 +60,8 @@ function! vat#new_command_line(current_job)
 
   execute('inoremap <buffer> <C-N>'
         \ . ' <C-R>=job_object#buffer_complete()<CR>')
+  execute('inoremap <buffer> <C-P>'
+        \ . ' <C-R>=job_object#buffer_complete()<CR>')
 
   startinsert
 endfunction
