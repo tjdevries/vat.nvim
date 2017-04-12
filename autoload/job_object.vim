@@ -1,10 +1,11 @@
-function! job_object#create(buffer_id, job_id, opts) abort
+function! job_object#create(buffer_id, job_id, window_id, opts) abort
   let obj = {}
 
   let obj.opts = a:opts
   let obj.__history = []
   let obj.buffer_id = a:buffer_id
   let obj.job_id = a:job_id
+  let obj.window_id = a:window_id
   let obj.add_command = function('job_object#add_command')
   let obj.start_suggestions = function('job_object#start_suggestions')
 
@@ -36,6 +37,10 @@ endfunction
 
 function! job_object#add_command(command) dict abort
   if type(a:command) == v:t_list
+    if empty(a:command)
+      return
+    endif
+
     for item in a:command
       call add(self.__history, item)
     endfor
@@ -70,4 +75,20 @@ function! job_object#buffer_complete() abort
   call map(suggestions, 'v:val[' . len_line . ':]')
   call complete(col('.'), suggestions)
   return ''
+endfunction
+
+function! job_object#reset_command() abort
+  let b:{g:vat#global#var_prefix}_position = 0
+endfunction
+
+function! job_object#previous_command() abort
+  let b:{g:vat#global#var_prefix}_position =
+        \ get(b:, g:vat#global#var_prefix . '_position', 0) - 1
+  return job_object#get_buffer_job().__history[b:{g:vat#global#var_prefix}_position]
+endfunction
+
+function! job_object#next_command() abort
+  let b:{g:vat#global#var_prefix}_position =
+        \ get(b:, g:vat#global#var_prefix . '_position', 0) + 1
+  return job_object#get_buffer_job().__history[b:{g:vat#global#var_prefix}_position]
 endfunction
