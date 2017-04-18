@@ -72,9 +72,13 @@ function! job_object#add_command(command) dict abort  " {{{
   endif
 
   for item in a:command
+    " TODO: I'd like to be able to get more accurate time readings
+    " \ str2nr(split(execute('py3 import time; print(time.time())'))[0])
     call add(self.__history, {
           \ 'value': item,
-          \ 'time': localtime(),
+          \ 'time': has('python3') ?
+              \ localtime()
+              \ : localtime(),
           \ })
 
     let self.__history_count += 1
@@ -135,9 +139,9 @@ endfunction " }}}
 
 ""
 " Add a recording to a job object
-function! job_object#add_recording(record) dict abort
+function! job_object#add_recording(record) dict abort  " {{{
   let self.__recordings[a:record.name] = a:record
-endfunction
+endfunction  " }}}
 
 ""
 " Start a recording for a job_object
@@ -146,6 +150,7 @@ endfunction
 "   .start  The starting command index of the recording
 "   .end  The ending command index of the recording
 "   .max_timeout  The maximum timeout to wait between commands
+"   .commands  Can move the commands
 function! job_object#start_recording(...) dict abort  " {{{
   let opts = get(a:000, 0, {})
   if self.__is_recording != v:false
@@ -184,7 +189,7 @@ endfunction  " }}}
 
 ""
 " Play a recording back
-function! job_object#play_recording(...) dict abort
+function! job_object#play_recording(...) dict abort  " {{{
   let options = ["Name of recording:"] + map(keys(self.__recordings), 'v:key . ": " . v:val')
   let name = get(a:000, 0, v:false)
 
@@ -205,9 +210,15 @@ function! job_object#play_recording(...) dict abort
     let command = self.__history[index]
 
     " Wait in between sending the amount specified during recording
+    " Minimum of one second of waiting
     if index != recording.end
       let next_command = self.__history[index + 1]
-      let wait_time = min([(next_command.time - command.time), recording.max_timeout])
+      let wait_time = max([
+            \ min([
+              \ (next_command.time - command.time),
+              \ recording.max_timeout]
+              \ ),
+            \ 1])
       execute 'sleep ' . wait_time
     endif
 
@@ -216,4 +227,4 @@ function! job_object#play_recording(...) dict abort
   endfor
 
   return recording
-endfunction
+endfunction  " }}}
