@@ -68,17 +68,16 @@ function! vat#new_command_line(current_job)
 
 
   " TODO: Make these configurable for users
-  execute('inoremap <buffer> <C-N>'
-        \ . ' <C-R>=job_object#buffer_complete()<CR>')
-  execute('inoremap <buffer> <C-P>'
-        \ . ' <C-R>=job_object#buffer_complete()<CR>')
+  inoremap <buffer> <C-N> <C-R>=job_object#buffer_complete()<CR>
+  inoremap <buffer> <C-P> <C-R>=job_object#buffer_complete()<CR>
 
   startinsert
 endfunction
 
 function! vat#send_command(command_buffer, term_buffer) abort
-  let l:lines = nvim_buf_get_lines(a:command_buffer, 0, -1, 1)
-  call jobsend(a:term_buffer, join(l:lines, "\n") . "\n")
+  call jobsend(a:term_buffer,
+        \ join(nvim_buf_get_lines(a:command_buffer, 0, -1, 1),"\n")
+        \ . "\n")
   call s:cleanup()
 endfunction
 
@@ -103,4 +102,10 @@ function! s:cleanup() abort
   call nvim_buf_set_lines(0, 0, -1, 0, [''])
   call job_object#get_buffer_job().add_command(l:lines)
   call job_object#reset_command()
+endfunction
+
+""
+" Things to test:
+function! s:test() abort
+  let get_all_the_lines = getline(line('$') - line('w0'), line('$'))
 endfunction
